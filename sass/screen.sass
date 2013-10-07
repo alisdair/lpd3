@@ -8,6 +8,8 @@
   float: left
   padding: 0 $gutter-width/2
   .inequality
+    +transition-property("stroke-opacity")
+    +transition-duration(200ms)
     fill: none
     stroke: #555
     stroke-width: 3px
@@ -15,7 +17,7 @@
     .inequality_#{$i}
       stroke: hsl(255 * $i/9, 60, 60)
   .hidden
-    display: none
+    stroke-opacity: 0
 
 #program
   width: 200px

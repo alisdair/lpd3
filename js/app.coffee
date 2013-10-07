@@ -72,22 +72,24 @@ $ ->
   x = d3.scale.linear().range([0, width]).domain([_.min(xs), _.max(xs)])
   y = d3.scale.linear().range([height, 0]).domain([_.min(ys), _.max(ys)])
 
-  vis.selectAll(".inequality")
-    .data(program)
-    .enter().append("svg:line")
-      .attr("class", (d, i) -> "inequality inequality_#{i}")
-      .attr("x1", x(0))
-      .attr("y1", (d) -> if d.y == 0 then y(_.max(ys)) else y(-d.c / d.y))
-      .attr("x2", (d) -> if d.x == 0 then x(_.max(xs)) else x(-d.c / d.x))
-      .attr("y2", y(0))
-      .classed("hidden", (d) -> not d.enabled)
+  do update = (data=program) ->
+    lines = vis.selectAll(".inequality")
+      .data(data)
+    lines.enter().append("svg:line")
+    lines.attr("class", (d, i) -> "inequality inequality_#{i}")
+        .attr("x1", x(0))
+        .attr("y1", (d) -> if d.y == 0 then y(_.max(ys)) else y(-d.c / d.y))
+        .attr("x2", (d) -> if d.x == 0 then x(_.max(xs)) else x(-d.c / d.x))
+        .attr("y2", y(0))
+        .classed("hidden", (d) -> not d.enabled)
 
   _.each program, (inequality, i) ->
     selector = "inequality_#{i}"
-    input = "<input type='checkbox' id='#{selector}_checkbox' data-selector='#{selector}' checked='#{inequality.enabled}'>"
+    input = "<input type='checkbox' id='#{selector}_checkbox' data-index='#{i}' #{if inequality.enabled then "checked" else ""}>"
     label = polynomial(inequality)
     $("#program").append("<label>#{input} #{label}")
 
   $("#program input").on "change", (e) ->
-    selector = $(this).data("selector")
-    $("#diagram .#{selector}").toggle($(this).is(":checked"))
+    index = parseInt $(this).data("index")
+    program[index].enabled = $(this).is(":checked")
+    update program
