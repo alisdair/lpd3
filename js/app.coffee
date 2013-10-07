@@ -31,7 +31,7 @@ $ ->
   vis.selectAll(".inequality")
     .data(coefficients)
     .enter().append("svg:line")
-      .attr("class", "inequality")
+      .attr("class", (d, i) -> "inequality inequality_#{i}")
       .attr("x1", x(0))
       .attr("y1", (d) -> if d[1] == 0 then y(_.max(ys)) else y(-d[2] / d[1]))
       .attr("x2", (d) -> if d[0] == 0 then x(_.max(xs)) else x(-d[2] / d[0]))

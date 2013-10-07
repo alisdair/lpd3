@@ -4,3 +4,7 @@
   .inequality
     fill: none
     stroke: #555
+    stroke-width: 3px
+  @for $i from 0 through 9
+    .inequality_#{$i}
+      stroke: hsl(255 * $i/9, 60, 60)
