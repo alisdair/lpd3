@@ -1,6 +1,12 @@
 @import base
 
-#program
+#main
+  +clearfix
+
+#diagram
+  width: 480px
+  float: left
+  padding: 0 $gutter-width/2
   .inequality
     fill: none
     stroke: #555
@@ -8,3 +14,12 @@
   @for $i from 0 through 9
     .inequality_#{$i}
       stroke: hsl(255 * $i/9, 60, 60)
+  .hidden
+    display: none
+
+#program
+  width: 200px
+  float: left
+  padding: 0 $gutter-width/2
+  label
+    display: block
