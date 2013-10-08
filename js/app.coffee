@@ -67,21 +67,41 @@ $ ->
     .append("g")
       .attr("transform", "translate(#{margin.left}, #{margin.top})")
 
-  xs = _.map(program, (d) -> -d.c / d.x)
-  ys = _.map(program, (d) -> -d.c / d.y)
-  x = d3.scale.linear().range([0, width]).domain([_.min(xs), _.max(xs)])
-  y = d3.scale.linear().range([height, 0]).domain([_.min(ys), _.max(ys)])
-
   do update = (data=program) ->
+    xs = _.map(program, (d) -> -d.c / d.x)
+    ys = _.map(program, (d) -> -d.c / d.y)
+    x = d3.scale.linear().range([0, width]).domain([_.min(xs), _.max(xs)])
+    y = d3.scale.linear().range([height, 0]).domain([_.min(ys), _.max(ys)])
+
     lines = vis.selectAll(".inequality")
       .data(data)
     lines.enter().append("svg:line")
     lines.attr("class", (d, i) -> "inequality inequality_#{i}")
-        .attr("x1", x(0))
+        .attr("x1", x(_.min(xs)))
         .attr("y1", (d) -> if d.y == 0 then y(_.max(ys)) else y(-d.c / d.y))
         .attr("x2", (d) -> if d.x == 0 then x(_.max(xs)) else x(-d.c / d.x))
-        .attr("y2", y(0))
+        .attr("y2", y(_.min(ys)))
         .classed("hidden", (d) -> not d.enabled)
+    areas = vis.selectAll(".region")
+      .data(data)
+    areas.enter().append("svg:path")
+    areas.attr("class", (d, i) -> "region region_#{i}")
+      .classed("hidden", (d) -> not d.enabled)
+      .attr("d", (d) ->
+        x1 = x(_.min(xs))
+        y1 = if d.y == 0 then y(_.max(ys)) else y(-d.c / d.y)
+        x2 = if d.x == 0 then x(_.max(xs)) else x(-d.c / d.x)
+        y2 = y(_.min(ys))
+        if d.x > 0
+          x3 = x(_.min(xs))
+        else
+          x3 = x(_.max(xs))
+        if d.y > 0
+          y3 = y(_.min(ys))
+        else
+          y3 = y(_.max(ys))
+        "M #{x1} #{y1} L #{x2} #{y2} L #{x3} #{y3} Z"
+      )
 
   _.each program, (inequality, i) ->
     selector = "inequality_#{i}"

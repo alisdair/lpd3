@@ -8,7 +8,7 @@
   float: left
   padding: 0 $gutter-width/2
   .inequality
-    +transition-property("stroke-opacity")
+    +transition-property(stroke-opacity opacity)
     +transition-duration(200ms)
     fill: none
     stroke: #555
@@ -16,7 +16,15 @@
   @for $i from 0 through 9
     .inequality_#{$i}
       stroke: hsl(255 * $i/9, 60, 60)
+
+  .region
+    fill: rgba(0, 0, 0, 0.3)
+  @for $i from 0 through 9
+    .region_#{$i}
+      fill: hsla(255 * $i/9, 60, 60, 0.3)
+
   .hidden
+    opacity: 0
     stroke-opacity: 0
 
 #program
