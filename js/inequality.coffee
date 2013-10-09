@@ -1,10 +1,3 @@
-# These inputs should all be parseable. Not a maximally reduced set,
-# but I think this covers everything
-good = ["2x + 0.5y < 350", "-3x+2y-50<0","-x-3y-1>0", "2<x+y", "2x+-5y+5+6>0"]
-
-# These should be invalid.
-bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
-
 # Normal form of the inequality is x + y + c < 0
 class Inequality
   constructor: (@x, @y, @c) ->
@@ -21,6 +14,25 @@ class Token
 
   toString: -> "[#{@type} '#{@value}']"
 
+# Lexers can be applied in a set of states, with a regexp to match tokens,
+# and a token type to output
+class Lexer
+  constructor: (@states, @regexp, @token) ->
+
+lexers = [
+  # Operators follow coefficients and variables. This is highest priority
+  # so that x-5y is parsed as [x, -, 5, y], not [x, -5, y].
+  new Lexer ["COEFFICIENT", "VARIABLE"], /^[<>+-]/, "OPERATOR"
+
+  # Coefficients can only appear at the start of the expression or after an
+  # operator. The value is either a number or "-", which means -1.
+  new Lexer [undefined, "OPERATOR"], /^(-?[0-9]+(\.[0-9]+)?)|(-)/, "COEFFICIENT"
+
+  # Variables follow everything except other variables. Only x and y are
+  # allowed, since this is a two-variable inequality.
+  new Lexer [undefined, "COEFFICIENT", "OPERATOR"], /^[xyXY]/, "VARIABLE"
+]
+
 lex = (input, tokens=[]) ->
   if input.length == 0
     return tokens
@@ -34,33 +46,27 @@ lex = (input, tokens=[]) ->
   if result
     return lex consume(input, result), tokens
 
-  # Operators must follow coefficients or variables
-  if state == "COEFFICIENT" or state == "VARIABLE"
-    result = /^[<>+-]/.exec input
+  # Lex tokens!
+  for lexer in lexers
+    continue unless state in lexer.states
+    result = lexer.regexp.exec input
     if result
-      token = new Token "OPERATOR", result[0]
-      return lex consume(input, result), tokens.concat(token)
-
-  # Coefficients can exist at the start of an expression, or after an operator
-  if not state or state == "OPERATOR"
-    result = /^(-?[0-9]+(\.[0-9]+)?)|(-)/.exec input
-    if result
-      token = new Token "COEFFICIENT", result[0]
-      return lex consume(input, result), tokens.concat(token)
-
-  # Variables can come at any point except after a variable
-  if state != "VARIABLE"
-    result = /^[xyXY]/.exec input
-    if result
-      token = new Token "VARIABLE", result[0]
+      token = new Token lexer.token, result[0]
       return lex consume(input, result), tokens.concat(token)
 
   throw "Parse error at '#{input}' (tokens: #{tokens}, last token: #{previous})"
+
+# These inputs should all be parseable. Not a maximally reduced set,
+# but I think this covers everything
+good = ["2x + 0.5y < 350", "-3x+2y-50<0","-x-3y-1>0", "2<x+y", "2x+-5y+5+6>0"]
 
 console.log "Good inputs:\n"
 for i in good
   console.log i
   console.log lex(i).join(" -> ")
+
+# These should be invalid.
+bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
 
 console.log "\nBad inputs:\n"
 for i in bad
