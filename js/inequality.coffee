@@ -6,7 +6,8 @@ class Inequation
 
 # A non-normalised inequality is made up of multiple terms
 class Term
-  constructor: (@coefficient, @variable) ->
+  constructor: (coefficient, @variable) ->
+    @coefficient = parseFloat coefficient
 
   toString: ->
     c = "#{@coefficient}"
