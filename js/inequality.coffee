@@ -24,6 +24,8 @@ class Inequality
 # Tokens have type and value
 class Token
   constructor: (@type, @value) ->
+    if @type == "COEFFICIENT" and @value == "-"
+      @value = "-1"
 
   toString: -> "[#{@type} '#{@value}']"
 
@@ -77,13 +79,6 @@ lex = (input, tokens=[]) ->
       return lex consume(input, result), tokens.concat(token)
 
   throw "Parse error at '#{input}' (tokens: #{tokens}, last token: #{previous})"
-
-normalise_minus_coefficients = (tokens) ->
-  tokens.map (t) ->
-    if t.type == "COEFFICIENT" and t.value == "-"
-      new Token "COEFFICIENT", "-1"
-    else
-      t
 
 # Replace all subtract operators with adds, normalising the coefficeints
 normalise_coefficients = (tokens, normalised=[]) ->
@@ -147,18 +142,13 @@ for i in bad
 
 # Test the parser
 inequation = good[1]
-console.log "\nParsing: #{inequation}\n"
+console.log "\nParsing:\n#{inequation}\n"
 
 tokens = lex inequation
-console.log "Tokens: #{tokens}"
+console.log "Tokens:\n#{tokens}\n"
 
-normalised = normalise_minus_coefficients tokens
-console.log "Normalised minus: #{normalised}"
-
-normalised = normalise_coefficients normalised
-console.log "Normalised coefficients: #{normalised}"
+normalised = normalise_coefficients tokens
+console.log "Normalised coefficients:\n#{normalised}\n"
 
 parsed = parse normalised
-console.log "Parsed: #{parsed}"
-
-console.log parse normalise_coefficients normalise_minus_coefficients tokens
+console.log "Parsed:\n#{parsed}\n"
