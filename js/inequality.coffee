@@ -4,10 +4,6 @@ class Inequality
 
   toString: -> "#{@x}x + #{@y}y + #{@c} < 0"
 
-# Given a string and a RegExp.exec result, return the unmatched remainder
-# of the string
-consume = (input, result) -> input.slice(result.index + result[0].length)
-
 # Tokens have type and value
 class Token
   constructor: (@type, @value) ->
@@ -33,6 +29,11 @@ lexers = [
   new Lexer [undefined, "COEFFICIENT", "OPERATOR"], /^[xyXY]/, "VARIABLE"
 ]
 
+# Given a string and a RegExp.exec result, return the unmatched remainder
+# of the string
+consume = (input, result) -> input.slice(result.index + result[0].length)
+
+# Lex the input string into an array of tokens
 lex = (input, tokens=[]) ->
   if input.length == 0
     return tokens
