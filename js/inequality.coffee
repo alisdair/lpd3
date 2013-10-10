@@ -123,9 +123,10 @@ parse = (tokens, terms=[]) ->
     else
       throw "Unexpected token found: #{tokens[0]}"
 
-# Validate and convert the inequality to less than
+# Validate and convert the inequality to less than, if necessary
 convert_inequality = (terms) ->
   inequalities = terms.filter (t) -> t.constructor == Inequality
+
   if inequalities.length == 0
     throw "No inequalities in expression: #{terms}"
 
@@ -138,14 +139,18 @@ convert_inequality = (terms) ->
   if index == terms.length - 1
     throw "Inequality at the end of expression: #{terms}"
 
+  # Inequality is present, valid, and already less-than, so we're done
   if inequality.sign == "<"
     return terms
 
-  inequality = new Inequality "<"
-  left = terms.slice(0, index)
-  right = terms.slice(index + 1)
+  # Inequality is greater-than, so we need to invert all terms and replace it
+  invert = (term) -> new Term term.coefficient * -1, term.variable
 
-  return right.concat(inequality, left)
+  inequality = new Inequality "<"
+  left = terms.slice(0, index).map invert
+  right = terms.slice(index + 1).map invert
+
+  return left.concat(inequality, right)
 
 # These inputs should all be parseable. Not a maximally reduced set,
 # but I think this covers everything
