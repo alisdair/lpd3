@@ -139,18 +139,22 @@ convert_inequality = (terms) ->
   if index == terms.length - 1
     throw "Inequality at the end of expression: #{terms}"
 
-  # Inequality is present, valid, and already less-than, so we're done
-  if inequality.sign == "<"
-    return terms
-
-  # Inequality is greater-than, so we need to invert all terms and replace it
   invert = (term) -> new Term term.coefficient * -1, term.variable
 
-  inequality = new Inequality "<"
-  left = terms.slice(0, index).map invert
-  right = terms.slice(index + 1).map invert
+  zero = new Term 0, "c"
 
-  return left.concat(inequality, right)
+  left = terms.slice(0, index)
+  right = terms.slice(index + 1)
+
+  if inequality.sign == "<"
+    return left.concat(right.map(invert), inequality, zero)
+  else
+    inequality = new Inequality "<"
+    return left.map(invert).concat(right, inequality, zero)
+
+normalise_inequation = (terms, inequation=new Inequation 0, 0, 0) ->
+  inequation
+
 
 # These inputs should all be parseable. Not a maximally reduced set,
 # but I think this covers everything
@@ -161,16 +165,21 @@ for i in good
   console.log i
 
   tokens = lex i
-  console.log tokens
+  console.log tokens.join(" ")
 
   converted = convert_operators tokens
-  console.log converted
+  console.log converted.join(" ")
 
   parsed = parse converted
   console.log parsed.join(" ")
 
   converted = convert_inequality parsed
   console.log converted.join(" ")
+
+  normalised = normalise_inequation converted
+  console.log normalised.toString()
+
+  console.log ""
 
 # These should be invalid.
 bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
