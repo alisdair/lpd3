@@ -152,9 +152,21 @@ convert_inequality = (terms) ->
     inequality = new Inequality "<"
     return left.map(invert).concat(right, inequality, zero)
 
-normalise_inequation = (terms, inequation=new Inequation 0, 0, 0) ->
-  inequation
+normalise_inequation = (terms, i=new Inequation 0, 0, 0) ->
+  if terms.length == 0
+    throw "Unexpected end of expression"
 
+  if terms[0].constructor == Inequality
+    return i
+
+  term = terms[0]
+  inequation = switch term.variable
+    when "x" then new Inequation i.x + term.coefficient, i.y, i.c
+    when "y" then new Inequation i.x, i.y + term.coefficient, i.c
+    when "c" then new Inequation i.x, i.y, i.c + term.coefficient
+    else throw "Unexpected term '#{term}'"
+
+  return normalise_inequation terms.slice(1), inequation
 
 # These inputs should all be parseable. Not a maximally reduced set,
 # but I think this covers everything
