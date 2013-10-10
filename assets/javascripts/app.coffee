@@ -66,7 +66,7 @@ $ ->
     .append("g")
       .attr("transform", "translate(#{margin.left}, #{margin.top})")
 
-  do update = (data=program) ->
+  update = (data=program) ->
     xs = _.map(program, (d) -> -d.c / d.x)
     ys = _.map(program, (d) -> -d.c / d.y)
     x = d3.scale.linear().range([0, width]).domain([_.min(xs), _.max(xs)])
@@ -102,13 +102,27 @@ $ ->
         "M #{x1} #{y1} L #{x2} #{y2} L #{x3} #{y3} Z"
       )
 
-  _.each program, (inequality, i) ->
-    selector = "inequality_#{i}"
-    input = "<input type='checkbox' id='#{selector}_checkbox' data-index='#{i}' #{if inequality.enabled then "checked" else ""}>"
-    label = polynomial(inequality)
-    $("#program").append("<label>#{input} #{label}")
+  do updateCheckboxes = ->
+    $("#program").empty()
 
-  $("#program input").on "change", (e) ->
-    index = parseInt $(this).data("index")
-    program[index].enabled = $(this).is(":checked")
+    _.each program, (inequality, i) ->
+      selector = "inequality_#{i}"
+      input = "<input type='checkbox' id='#{selector}_checkbox' data-index='#{i}' #{if inequality.enabled then "checked" else ""}>"
+      label = polynomial(inequality)
+      $("#program").append("<label>#{input} #{label}")
+
+    $("#program input[type=checkbox]").on "change", (e) ->
+      index = parseInt $(this).data("index")
+      program[index].enabled = $(this).is(":checked")
+      update program
+
     update program
+
+  $("#inequation + button").click (e) ->
+    e.preventDefault()
+    try
+      inequation = CompileInequation $("#inequation").val()
+      program.push inequation
+      updateCheckboxes()
+    catch e
+      alert e
