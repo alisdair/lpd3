@@ -1,0 +1,11 @@
+!!!
+%html
+  %head
+    %title= settings.title
+    = stylesheet_tag "screen"
+    = javascript_tag "app"
+  %body
+    #wrapper
+      #title= settings.title
+      = yield
+      / Made with Doofer: https://github.com/alisdair/doofer

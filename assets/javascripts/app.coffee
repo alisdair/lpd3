@@ -1,8 +1,7 @@
-inequality = (x, y, c) ->
-  x: x
-  y: y
-  c: c
-  enabled: true
+#= require jquery-2.0.3
+#= require d3.v3
+#= require lodash
+#= require inequality
 
 # FIXME: possibly the worst function I have ever written
 polynomial = (inequality) ->
@@ -44,10 +43,10 @@ polynomial = (inequality) ->
     "idk"
 
 program = [
-    inequality 1, 1, -210
-    inequality 2, 1, -280
-    inequality -1, 0, 0
-    inequality 0, -1, 0
+    new Inequation 1, 1, -210
+    new Inequation 2, 1, -280
+    new Inequation -1, 0, 0
+    new Inequation 0, -1, 0
   ]
 
 $ ->

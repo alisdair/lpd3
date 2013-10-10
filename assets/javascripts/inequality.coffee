@@ -1,6 +1,7 @@
 # Normal form of the inequality is x + y + c < 0
 class Inequation
   constructor: (@x, @y, @c) ->
+    @enabled = true
 
   toString: -> "#{@x}x + #{@y}y + #{@c} < 0"
 
@@ -168,39 +169,47 @@ normalise_inequation = (terms, i=new Inequation 0, 0, 0) ->
 
   return normalise_inequation terms.slice(1), inequation
 
-# These inputs should all be parseable. Not a maximally reduced set,
-# but I think this covers everything
-good = ["2x + 0.5y < 350", "-3x+2y-50<0","-x-3y-1>0", "2<x+y", "2x+-5y+5-x+6>0"]
+# Compose all functions for compiling inequation
+compile = (input) ->
+  normalise_inequation convert_inequality parse convert_operators lex input
 
-console.log "Good inputs:\n"
-for i in good
-  console.log i
+@Inequation = Inequation
+@CompileInequation = compile
 
-  tokens = lex i
-  console.log tokens.join(" ")
+tests = ->
+  # These inputs should all be parseable. Not a maximally reduced set,
+  # but I think this covers everything
+  good = ["2x + 0.5y < 350", "-3x+2y-50<0","-x-3y-1>0", "2<x+y", "2x+-5y+5-x+6>0"]
 
-  converted = convert_operators tokens
-  console.log converted.join(" ")
+  console.log "Good inputs:\n"
+  for i in good
+    console.log i
 
-  parsed = parse converted
-  console.log parsed.join(" ")
+    tokens = lex i
+    console.log tokens.join(" ")
 
-  converted = convert_inequality parsed
-  console.log converted.join(" ")
+    converted = convert_operators tokens
+    console.log converted.join(" ")
 
-  normalised = normalise_inequation converted
-  console.log normalised.toString()
+    parsed = parse converted
+    console.log parsed.join(" ")
 
-  console.log ""
+    converted = convert_inequality parsed
+    console.log converted.join(" ")
 
-# These should be invalid.
-bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
+    normalised = normalise_inequation converted
+    console.log normalised.toString()
 
-console.log "\nBad inputs:\n"
-for i in bad
-  try
-    tokens = lex(i)
-    console.log "Should not have been able to lex '#{i}'"
-    console.log "Result: ", tokens
-  catch e
-    console.log e
+    console.log ""
+
+  # These should be invalid.
+  bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
+
+  console.log "\nBad inputs:\n"
+  for i in bad
+    try
+      tokens = lex(i)
+      console.log "Should not have been able to lex '#{i}'"
+      console.log "Result: ", tokens
+    catch e
+      console.log e
