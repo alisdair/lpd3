@@ -89,9 +89,13 @@ normalise_coefficients = (tokens, normalised=[]) ->
     if tokens.length == 1
       throw "Unexpected end of expression at operator: #{tokens}"
     operator = new Token "OPERATOR", "+"
-    value = parseFloat(tokens[1].value) * -1
-    coefficient = new Token "COEFFICIENT", "#{value}"
-    return normalise_coefficients tokens.slice(2), normalised.concat(operator, coefficient)
+    if tokens[1].type == "COEFFICIENT"
+      value = parseFloat(tokens[1].value) * -1
+      coefficient = new Token "COEFFICIENT", "#{value}"
+      return normalise_coefficients tokens.slice(2), normalised.concat(operator, coefficient)
+    else
+      coefficient = new Token "COEFFICIENT", "-1"
+      return normalise_coefficients tokens.slice(1), normalised.concat(operator, coefficient)
 
   return normalise_coefficients tokens.slice(1), normalised.concat(tokens[0])
 
@@ -126,7 +130,15 @@ good = ["2x + 0.5y < 350", "-3x+2y-50<0","-x-3y-1>0", "2<x+y", "2x+-5y+5-x+6>0"]
 console.log "Good inputs:\n"
 for i in good
   console.log i
-  console.log lex(i).join(" -> ")
+
+  tokens = lex i
+  console.log tokens
+
+  normalised = normalise_coefficients tokens
+  console.log normalised
+
+  result = parse normalised
+  console.log result.join(" ")
 
 # These should be invalid.
 bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
@@ -139,16 +151,3 @@ for i in bad
     console.log "Result: ", tokens
   catch e
     console.log e
-
-# Test the parser
-inequation = good[1]
-console.log "\nParsing:\n#{inequation}\n"
-
-tokens = lex inequation
-console.log "Tokens:\n#{tokens}\n"
-
-normalised = normalise_coefficients tokens
-console.log "Normalised coefficients:\n#{normalised}\n"
-
-parsed = parse normalised
-console.log "Parsed:\n#{parsed}\n"
