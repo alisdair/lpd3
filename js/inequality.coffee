@@ -123,6 +123,30 @@ parse = (tokens, terms=[]) ->
     else
       throw "Unexpected token found: #{tokens[0]}"
 
+# Validate and convert the inequality to less than
+convert_inequality = (terms) ->
+  inequalities = terms.filter (t) -> t.constructor == Inequality
+  if inequalities.length == 0
+    throw "No inequalities in expression: #{terms}"
+
+  if inequalities.length > 1
+    throw "Too many inequalities in expression: #{terms}"
+
+  inequality = inequalities[0]
+  index = terms.indexOf inequality
+
+  if index == terms.length - 1
+    throw "Inequality at the end of expression: #{terms}"
+
+  if inequality.sign == "<"
+    return terms
+
+  inequality = new Inequality "<"
+  left = terms.slice(0, index)
+  right = terms.slice(index + 1)
+
+  return right.concat(inequality, left)
+
 # These inputs should all be parseable. Not a maximally reduced set,
 # but I think this covers everything
 good = ["2x + 0.5y < 350", "-3x+2y-50<0","-x-3y-1>0", "2<x+y", "2x+-5y+5-x+6>0"]
@@ -137,8 +161,11 @@ for i in good
   converted = convert_operators tokens
   console.log converted
 
-  result = parse converted
-  console.log result.join(" ")
+  parsed = parse converted
+  console.log parsed.join(" ")
+
+  converted = convert_inequality parsed
+  console.log converted.join(" ")
 
 # These should be invalid.
 bad  = ["< 5", "horse", "x + y + z < 0", "x = 0"]
