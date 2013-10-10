@@ -81,7 +81,7 @@ lex = (input, tokens=[]) ->
   throw "Parse error at '#{input}' (tokens: #{tokens}, last token: #{previous})"
 
 # Replace all subtract operators with adds, normalising the coefficeints
-normalise_coefficients = (tokens, normalised=[]) ->
+convert_operators = (tokens, normalised=[]) ->
   if tokens.length == 0
     return normalised
 
@@ -92,12 +92,12 @@ normalise_coefficients = (tokens, normalised=[]) ->
     if tokens[1].type == "COEFFICIENT"
       value = parseFloat(tokens[1].value) * -1
       coefficient = new Token "COEFFICIENT", "#{value}"
-      return normalise_coefficients tokens.slice(2), normalised.concat(operator, coefficient)
+      return convert_operators tokens.slice(2), normalised.concat(operator, coefficient)
     else
       coefficient = new Token "COEFFICIENT", "-1"
-      return normalise_coefficients tokens.slice(1), normalised.concat(operator, coefficient)
+      return convert_operators tokens.slice(1), normalised.concat(operator, coefficient)
 
-  return normalise_coefficients tokens.slice(1), normalised.concat(tokens[0])
+  return convert_operators tokens.slice(1), normalised.concat(tokens[0])
 
 # Parse the lexed tokens into a set of terms
 parse = (tokens, terms=[]) ->
@@ -134,10 +134,10 @@ for i in good
   tokens = lex i
   console.log tokens
 
-  normalised = normalise_coefficients tokens
-  console.log normalised
+  converted = convert_operators tokens
+  console.log converted
 
-  result = parse normalised
+  result = parse converted
   console.log result.join(" ")
 
 # These should be invalid.
