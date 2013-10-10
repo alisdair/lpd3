@@ -118,7 +118,7 @@ $ ->
 
     update program
 
-  $("#inequation + button").click (e) ->
+  $("form").submit (e) ->
     e.preventDefault()
     try
       inequation = CompileInequation $("#inequation").val()
